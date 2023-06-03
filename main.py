@@ -48,7 +48,7 @@ ARROWS = [pygame.image.load(os.path.join("Assets/arrow", "arrow.png")),
 class HORSE:
     X_POS = 80
     Y_POS = 490
-    Y_POS_DOWN = 505
+    Y_POS_DOWN = 510
     JUMP_VEL = 8.5
 
     def __init__(self):
@@ -153,7 +153,7 @@ class ARROW(Obstacle):
     def __init__(self, image):
         self.type = 0
         super().__init__(image, self.type)
-        self.rect.y = 400
+        self.rect.y = 420
         self.index = 0
 
     def draw(self, SCREEN):
