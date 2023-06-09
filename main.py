@@ -6,6 +6,7 @@ pygame.init()
 SCREEN_HEIGHT = 700
 SCREEN_WIDTH = 1300
 
+
 BG = pygame.image.load(os.path.join("Assets/Other", "sunrise.jpg"))
 SCREEN = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 BG_image = pygame.transform.scale(BG, (SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -15,27 +16,29 @@ SCREEN.blit(BG_image, (0, 0))
 pygame.mixer.music.load(os.path.join("Assets/music", "musi.mp3"))
 pygame.mixer.music.play(-1)
 
+homePage = [pygame.image.load(os.path.join("Assets/horse", "home.png"))]
 
-RUNNING = [pygame.image.load(os.path.join("Assets/horse", "newRun1.png")),
-           pygame.image.load(os.path.join("Assets/horse", "newRun2.png")),
-           pygame.image.load(os.path.join("Assets/horse", "newRun3.png"))]
+flags = [pygame.image.load(os.path.join("Assets/Other", "ethiopia flag.png")),
+         pygame.image.load(os.path.join("Assets/Other", "italy flag.png"))]
 
-JUMPING = pygame.image.load(os.path.join("Assets/horse", "newJump.png"))
+tank = [pygame.image.load(os.path.join("Assets/Other", "tank.png"))]
+road = pygame.image.load(os.path.join("Assets/Other", "road 3.jpg"))
 
-down = [pygame.image.load(os.path.join("Assets/horse", "newDown.png")),
-           pygame.image.load(os.path.join("Assets/horse", "newDown.png"))]
+RUNNING = [pygame.image.load(os.path.join("Assets/horse", "run_1.png")),
+           pygame.image.load(os.path.join("Assets/horse", "run_2.png")),
+           pygame.image.load(os.path.join("Assets/horse", "run_3.png"))]
 
-smallObstacle = [pygame.image.load(os.path.join("Assets/fire", "smallFire.png")),
-                pygame.image.load(os.path.join("Assets/fire", "smallFire.png")),
-                pygame.image.load(os.path.join("Assets/fire", "smallFire.png")),
-                pygame.image.load(os.path.join("Assets/fire", "smallFire.png")),
-                ]
+JUMPING = pygame.image.load(os.path.join("Assets/horse", "jump 2.png"))
+
+down = pygame.image.load(os.path.join("Assets/horse", "down.png"))
+
 
 largeObstacle = [pygame.image.load(os.path.join("Assets/fire", "largeFire.png")),
-                pygame.image.load(os.path.join("Assets/fire", "largeFire.png")),
-                pygame.image.load(os.path.join("Assets/fire", "largeFire.png")),
-                pygame.image.load(os.path.join("Assets/fire", "largeFire.png")),
+                pygame.image.load(os.path.join("Assets/fire", "stone 1.png")),
+                pygame.image.load(os.path.join("Assets/fire", "stone 2.png")),
                 ]
+
+
 
 ARROWS = [pygame.image.load(os.path.join("Assets/arrow", "arrow.png")),
         pygame.image.load(os.path.join("Assets/arrow", "arrow.png")),
@@ -46,16 +49,16 @@ ARROWS = [pygame.image.load(os.path.join("Assets/arrow", "arrow.png")),
 
 
 class HORSE:
-    X_POS = 80
-    Y_POS = 490
+    X_POS = 40
+    Y_POS = 430
     Y_POS_DOWN = 510
-    JUMP_VEL = 8.5
+    JUMP_VEL = 6
 
     def __init__(self):
         self.down_img = down
         self.run_img = RUNNING
         self.jump_img = JUMPING
-
+        
         self.horse_down = False
         self.horse_run = True
         self.horse_jump = False
@@ -78,7 +81,7 @@ class HORSE:
         if self.step_index >= 10:
             self.step_index = 0
 
-        if userInput[pygame.K_UP] and not self.horse_jump:
+        if userInput[pygame.K_SPACE] and not self.horse_jump:
             self.horse_down = False
             self.horse_run = False
             self.horse_jump = True
@@ -92,12 +95,16 @@ class HORSE:
             self.horse_jump = False
 
     def down(self):
-        self.image = self.down_img[self.step_index // 5]
+        self.image = self.down_img
         self.horse_rect = self.image.get_rect()
         self.horse_rect.x = self.X_POS
         self.horse_rect.y = self.Y_POS_DOWN
         self.step_index += 1
+        
+        
 
+        
+        
     def run(self):
         self.image = self.run_img[self.step_index // 4]
         self.horse_rect = self.image.get_rect()
@@ -109,14 +116,14 @@ class HORSE:
         self.image = self.jump_img
         if self.horse_jump:
             self.horse_rect.y -= self.jump_vel * 4
-            self.jump_vel -= 0.8
+            self.jump_vel -= 0.4
         if self.jump_vel < - self.JUMP_VEL:
             self.horse_jump = False
             self.jump_vel = self.JUMP_VEL
 
     def draw(self, SCREEN):
         SCREEN.blit(self.image, (self.horse_rect.x, self.horse_rect.y))
-
+        
 
 
 class Obstacle:
@@ -124,7 +131,7 @@ class Obstacle:
         self.image = image
         self.type = type
         self.rect = self.image[self.type].get_rect()
-        self.rect.x = SCREEN_WIDTH
+        self.rect.x = SCREEN_WIDTH - 380
 
     def update(self):
         self.rect.x -= game_speed
@@ -134,12 +141,6 @@ class Obstacle:
     def draw(self, SCREEN):
         SCREEN.blit(self.image[self.type], self.rect)
 
-
-class SmallCactus(Obstacle):
-    def __init__(self, image):
-        self.type = random.randint(0, 2)
-        super().__init__(image, self.type)
-        self.rect.y = 550
 
 
 class LargeCactus(Obstacle):
@@ -153,13 +154,13 @@ class ARROW(Obstacle):
     def __init__(self, image):
         self.type = 0
         super().__init__(image, self.type)
-        self.rect.y = 420
+        self.rect.y = 430
         self.index = 0
 
     def draw(self, SCREEN):
         if self.index >= 9:
             self.index = 0
-        SCREEN.blit(self.image[self.index//5], self.rect)
+        SCREEN.blit(self.image[self.index // 4], self.rect)
         self.index += 1
 
 
@@ -176,9 +177,11 @@ def main():
     obstacles = []
     death_count = 0
 
-    def score():
+
+    
+    def score(pnt = 1):
         global points, game_speed
-        points += 1
+        points += pnt
         if points % 100 == 0:
             game_speed += 1
 
@@ -199,14 +202,24 @@ def main():
         bg_surface.blit(BG_image, (0, 0))
         SCREEN.blit(bg_surface, (0, 0))
         userInput = pygame.key.get_pressed()
-
+        
+        SCREEN.blit(road, (0, 580))
+        SCREEN.blit(flags[0], (SCREEN_WIDTH // 2 - 320, 0))
+        SCREEN.blit(flags[1], (SCREEN_WIDTH // 2 + 80, 0))
+        
+        
+        SCREEN.blit(tank[0], (SCREEN_WIDTH - 400,500))
+        
+        
+        
         player.draw(SCREEN)
         player.update(userInput)
 
+
+
+        
         if len(obstacles) == 0:
-            if random.randint(0, 2) == 0:
-                obstacles.append(SmallCactus(smallObstacle))
-            elif random.randint(0, 2) == 1:
+            if random.randint(0, 2) <= 1:
                 obstacles.append(LargeCactus(largeObstacle))
             elif random.randint(0, 2) == 2:
                 obstacles.append(ARROW(ARROWS))
@@ -214,7 +227,14 @@ def main():
         for obstacle in obstacles:
             obstacle.draw(SCREEN)
             obstacle.update()
-            if player.horse_rect.colliderect(obstacle.rect):
+            
+            
+            if type(obstacle) == LargeCactus:
+                tolerance = -60
+            else:
+                tolerance = - 65 
+
+            if player.horse_rect.inflate(tolerance, tolerance).colliderect(obstacle.rect.inflate(tolerance, tolerance)):
                 pygame.time.delay(2000)
                 death_count += 1
                 menu(death_count)
@@ -237,7 +257,7 @@ def menu(death_count):
         
         text1 = font.render("ADWA GAME", True, (0, 0, 0))
         textRect1 = text1.get_rect()
-        textRect1.center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 50)
+        textRect1.center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 210)
         SCREEN.blit(text1, textRect1)
         
         if death_count == 0:
@@ -247,15 +267,15 @@ def menu(death_count):
             text = font.render("Press any Key to Restart", True, (0, 0, 0))
             score = font.render("Your Score: " + str(points), True, (0, 0, 0))
             scoreRect = score.get_rect()
-            scoreRect.center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 50)
+            scoreRect.center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 135)
             SCREEN.blit(score, scoreRect)
             
         
         
         textRect = text.get_rect()
-        textRect.center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
+        textRect.center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 170)
         SCREEN.blit(text, textRect)
-        SCREEN.blit(RUNNING[0], (SCREEN_WIDTH // 2 - 100, SCREEN_HEIGHT // 2 - 200))
+        SCREEN.blit(homePage[0], (SCREEN_WIDTH // 2 - 250, SCREEN_HEIGHT // 2 - 310))
         pygame.display.update()
         
         for event in pygame.event.get():
