@@ -8,44 +8,46 @@ SCREEN_WIDTH = 1300
 
 
 BG = pygame.image.load(os.path.join("Assets/Other", "sunrise.jpg"))
-SCREEN = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-BG_image = pygame.transform.scale(BG, (SCREEN_WIDTH, SCREEN_HEIGHT))
-SCREEN.blit(BG_image, (0, 0))
 
+
+#MUSIC
 
 pygame.mixer.music.load(os.path.join("Assets/music", "musi.mp3"))
 pygame.mixer.music.play(-1)
 
+#IMAGES
+
+birds = pygame.image.load(os.path.join("Assets/Other", "birds.png"))
 homePage = [pygame.image.load(os.path.join("Assets/horse", "home.png"))]
-
-flags = [pygame.image.load(os.path.join("Assets/Other", "ethiopia flag.png")),
-         pygame.image.load(os.path.join("Assets/Other", "italy flag.png"))]
-
-tank = [pygame.image.load(os.path.join("Assets/Other", "tank.png"))]
-road = pygame.image.load(os.path.join("Assets/Other", "road 3.jpg"))
-
-RUNNING = [pygame.image.load(os.path.join("Assets/horse", "run_1.png")),
+flags    = [pygame.image.load(os.path.join("Assets/Other", "ethiopia flag.png")),
+            pygame.image.load(os.path.join("Assets/Other", "italy flag.png"))]
+tank     = [pygame.image.load(os.path.join("Assets/Other", "tank.png"))]
+road     = pygame.image.load(os.path.join("Assets/Other", "road 3.jpg"))
+RUNNING  = [pygame.image.load(os.path.join("Assets/horse", "run_1.png")),
            pygame.image.load(os.path.join("Assets/horse", "run_2.png")),
            pygame.image.load(os.path.join("Assets/horse", "run_3.png"))]
-
-JUMPING = pygame.image.load(os.path.join("Assets/horse", "jump 2.png"))
-
-down = pygame.image.load(os.path.join("Assets/horse", "down.png"))
-
-
+JUMPING  = pygame.image.load(os.path.join("Assets/horse", "jump 2.png"))
+down     = pygame.image.load(os.path.join("Assets/horse", "down.png"))
 largeObstacle = [pygame.image.load(os.path.join("Assets/fire", "largeFire.png")),
                 pygame.image.load(os.path.join("Assets/fire", "stone 1.png")),
                 pygame.image.load(os.path.join("Assets/fire", "stone 2.png")),
                 ]
+foods = [pygame.image.load(os.path.join("Assets/Other", "food.png"))]
 
-
-
-ARROWS = [pygame.image.load(os.path.join("Assets/arrow", "arrow.png")),
+ARROWS  = [pygame.image.load(os.path.join("Assets/arrow", "arrow.png")),
         pygame.image.load(os.path.join("Assets/arrow", "arrow.png")),
         pygame.image.load(os.path.join("Assets/arrow", "arrow.png")),
         pygame.image.load(os.path.join("Assets/arrow", "arrow.png"))]
 
+planes = [pygame.image.load(os.path.join("Assets/Other", "plane 1.png")),
+          pygame.image.load(os.path.join("Assets/Other", "plane 2.png"))]
 
+
+
+
+SCREEN = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+BG_image = pygame.transform.scale(BG, (SCREEN_WIDTH, SCREEN_HEIGHT))
+SCREEN.blit(BG_image, (0, 0))
 
 
 class HORSE:
@@ -141,7 +143,24 @@ class Obstacle:
     def draw(self, SCREEN):
         SCREEN.blit(self.image[self.type], self.rect)
 
+    def eatFood(self):
+        obstacles.pop()
 
+class Food(Obstacle):
+    def __init__(self,image):
+        self.type = 0
+        super().__init__(image, self.type)
+        
+        rand = random.randint(0, 3)
+        
+        if rand == 0:
+            self.rect.y = 350
+        elif rand == 1:
+            self.rect.y = 500
+        else:
+            self.rect.y = 550
+    
+    
 
 class LargeCactus(Obstacle):
     def __init__(self, image):
@@ -203,7 +222,12 @@ def main():
         SCREEN.blit(bg_surface, (0, 0))
         userInput = pygame.key.get_pressed()
         
+        SCREEN.blit(birds,(20,140))
+        
         SCREEN.blit(road, (0, 580))
+        
+        SCREEN.blit(planes[0], (1000, 100))
+        
         SCREEN.blit(flags[0], (SCREEN_WIDTH // 2 - 320, 0))
         SCREEN.blit(flags[1], (SCREEN_WIDTH // 2 + 80, 0))
         
@@ -219,25 +243,33 @@ def main():
 
         
         if len(obstacles) == 0:
-            if random.randint(0, 2) <= 1:
+            if random.randint(0, 3) <= 1:
                 obstacles.append(LargeCactus(largeObstacle))
-            elif random.randint(0, 2) == 2:
+            elif random.randint(0, 3) == 2:
                 obstacles.append(ARROW(ARROWS))
+            else:
+                obstacles.append(Food(foods))
+                
 
         for obstacle in obstacles:
             obstacle.draw(SCREEN)
             obstacle.update()
             
-            
-            if type(obstacle) == LargeCactus:
-                tolerance = -60
+            if type(obstacle) == Food:
+                if player.horse_rect.colliderect(obstacle.rect):
+                    points += 100
+                    obstacle.eatFood()
+                    
             else:
-                tolerance = - 65 
+                if type(obstacle) == LargeCactus:
+                    tolerance = -60
+                else:
+                    tolerance = - 65 
 
-            if player.horse_rect.inflate(tolerance, tolerance).colliderect(obstacle.rect.inflate(tolerance, tolerance)):
-                pygame.time.delay(2000)
-                death_count += 1
-                menu(death_count)
+                if player.horse_rect.inflate(tolerance, tolerance).colliderect(obstacle.rect.inflate(tolerance, tolerance)):
+                    pygame.time.delay(2000)
+                    death_count += 1
+                    menu(death_count)
 
 
         score()
