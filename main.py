@@ -83,7 +83,7 @@ class HORSE:
         if self.step_index >= 10:
             self.step_index = 0
 
-        if userInput[pygame.K_SPACE] and not self.horse_jump:
+        if userInput[pygame.K_UP] and not self.horse_jump:
             self.horse_down = False
             self.horse_run = False
             self.horse_jump = True
